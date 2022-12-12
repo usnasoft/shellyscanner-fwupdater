@@ -62,7 +62,7 @@ public class FWUpdater {
 					System.out.println(out);
 				}
 			}
-			System.out.println("Press ctrl^C when firmware update is complete.\nDO NOT close terminal before");
+			System.out.println("Press ctrl^C when firmware update is complete\nDO NOT close terminal before");
 
 		} catch (ConnectException e) {
 			System.out.println("Shelly device at " + shellyIP + " is not responding");
