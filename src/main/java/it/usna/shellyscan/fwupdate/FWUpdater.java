@@ -43,10 +43,9 @@ public class FWUpdater {
 			System.exit(3);
 		}
 
-		HttpServer server = null;
 		try {
 			InetSocketAddress socket = new InetSocketAddress(InetAddress.getLocalHost(), PORT);
-			server = HttpServer.create(socket, 0);
+			HttpServer server = HttpServer.create(socket, 0);
 			server.createContext("/" + CONTEXT, new MyHandler(file));
 			server.setExecutor(null); // creates a default executor
 			server.start();
