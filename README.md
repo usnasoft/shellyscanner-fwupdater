@@ -19,4 +19,4 @@ Press ctrl^C when firmware update is complete
 DO NOT close terminal before
 
 Again: **wait until the update process is complete**  
-(use Shelly Scanner to check or http://\<shelly ip\>/shelly from a browser)
+(use Shelly Scanner to check or ``http://<shelly ip>/shelly`` from a browser)
