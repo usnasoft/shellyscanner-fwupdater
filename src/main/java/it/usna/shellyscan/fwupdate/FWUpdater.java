@@ -22,57 +22,48 @@ import com.sun.net.httpserver.HttpServer;
 public class FWUpdater {
 	private final static int PORT = 8000;
 	private final static String CONTEXT = "shellyfw";
+	private HttpServer server = null;
 
-	private final static String IPV4_REGEX = "^((0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)\\.){3}(0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)$";
+	public String update(String shellyIP, File file) throws ConnectException, IOException {
+		// try {
+		InetSocketAddress socket = new InetSocketAddress(InetAddress.getLocalHost(), PORT);
+		server = HttpServer.create(socket, 0);
+		server.createContext("/" + CONTEXT, new MyHandler(file));
+		server.setExecutor(null); // creates a default executor
+		server.start();
 
-	public static void main(String... args) throws IOException {
-		if (args.length != 2) {
-			usage();
-			System.exit(1);
-		}
-		String shellyIP = args[0];
-		if (shellyIP.matches(IPV4_REGEX) == false) {
-			System.out.println("invalid IP.");
-			usage();
-			System.exit(2);
-		}
-		File file = new File(args[1]);
-		if (file.exists() == false) {
-			System.out.println("file not found.");
-			usage();
-			System.exit(3);
-		}
+		System.out.println("Temporary server now responding at " + socket.getAddress().getHostAddress() + ":" + PORT);
+		
+		System.out.println("Updating firmware ...");
 
-		try {
-			InetSocketAddress socket = new InetSocketAddress(InetAddress.getLocalHost(), PORT);
-			HttpServer server = HttpServer.create(socket, 0);
-			server.createContext("/" + CONTEXT, new MyHandler(file));
-			server.setExecutor(null); // creates a default executor
-			server.start();
-
-			System.out.println("Temporary server ready at address " + socket.getAddress().getHostAddress());
-			System.out.println("Updating firmware ...");
-			final URL url = new URL("http://" + shellyIP + "/ota?url=http://" + socket.getAddress().getHostAddress() + ":" + PORT + "/" + CONTEXT);
-			URLConnection urlcon = url.openConnection();
-			try (BufferedReader br = new BufferedReader(new InputStreamReader(urlcon.getInputStream()))) {
-				System.out.println("Device response to command:");
-				String out;
-				while ((out = br.readLine()) != null) {
-					System.out.println(out);
-				}
+		final URL url = new URL("http://" + shellyIP + "/ota?url=http://" + socket.getAddress().getHostAddress() + ":" + PORT + "/" + CONTEXT);
+		URLConnection urlcon = url.openConnection();
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(urlcon.getInputStream()))) {
+			String out = "";
+			String line;
+			while ((line = br.readLine()) != null) {
+				out += line + '\n';
 			}
-			System.out.println("Press ctrl^C when firmware update is complete\nDO NOT close terminal before");
+			return out;
+		}
 
-		} catch (ConnectException e) {
-			System.out.println("Shelly device at " + shellyIP + " is not responding");
-			System.exit(4);
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-//			if (server != null) {
-//				server.stop(5000);
-//				System.exit(0);
-//			}
+		// } catch (ConnectException e) {
+		// System.out.println("Shelly device at " + shellyIP + " is not
+		// responding");
+		// System.exit(4);
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// } finally {
+		//// if (server != null) {
+		//// server.stop(5000);
+		//// System.exit(0);
+		//// }
+		// }
+	}
+	
+	public void stop() {
+		if(server != null) {
+			server.stop(1);
 		}
 	}
 
@@ -96,9 +87,5 @@ public class FWUpdater {
 				os.close();
 			}
 		}
-	}
-
-	private static void usage() {
-		System.out.println("Usage: java -jar shellyscanner-fwupdater-1.0.0.jar <shelly ip> <firmware file>");
 	}
 }
