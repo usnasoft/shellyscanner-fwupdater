@@ -20,7 +20,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>it.usna.shellyscan.fwupdate.FWUpdater</mainClass>
+							<mainClass>it.usna.shellyscan.fwupdate.Main</mainClass>
 							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 							<!--
 							<addClasspath>true</addClasspath>

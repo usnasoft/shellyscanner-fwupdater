@@ -84,7 +84,7 @@ public class MainDialog extends JFrame {
 		});
 		panelDevice.add(btnBrowse, BorderLayout.EAST);
 		
-		JLabel lblNewLabel_1 = new JLabel("Image file");
+		JLabel lblNewLabel_1 = new JLabel("Firmware image file (zip file)");
 		selectionPanel.add(lblNewLabel_1);
 		
 		JPanel panelFile = new JPanel(new BorderLayout(1, 0));

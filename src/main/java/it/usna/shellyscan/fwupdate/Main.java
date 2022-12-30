@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.net.ConnectException;
 
 public class Main {
-	public final static String NAME = "Shelly FW Updater 1.1.0";
+	public final static String NAME = "Shelly FW Updater 1.1.0 - usna Shelly Scanner module";
 	public final static String IPV4_REGEX = "^((0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)\\.){3}(0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)$";
 
 	public static void main(String... args) throws IOException {
