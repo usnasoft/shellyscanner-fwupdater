@@ -22,6 +22,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class MainDialog extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -43,23 +44,20 @@ public class MainDialog extends JFrame {
 			} catch (Exception ex) {}
 		}
 		
-		BorderLayout borderLayout = (BorderLayout) getContentPane().getLayout();
-		borderLayout.setVgap(5);
+		setContentPane(new JPanel(new BorderLayout()));
 		setTitle(Main.NAME);
 		setIconImage(Toolkit.getDefaultToolkit().createImage(getClass().getResource("/ShSc24.png")));
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		
 		JPanel selectionPanel = new JPanel();
-		selectionPanel.setOpaque(false);
-		selectionPanel.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 4));
+		selectionPanel.setBorder(BorderFactory.createEmptyBorder(2, 4, 8, 4));
 		getContentPane().add(selectionPanel, BorderLayout.NORTH);
 		selectionPanel.setLayout(new GridLayout(0, 1, 0, 0));
 		
-		JLabel lblNewLabel = new JLabel("Device IP");
+		JLabel lblNewLabel = new JLabel("Device IP (IP of the Shelly device to be updated)");
 		selectionPanel.add(lblNewLabel);
 		
-		JPanel panelDevice = new JPanel(new BorderLayout(0, 0));
-		panelDevice.setOpaque(false);
+		JPanel panelDevice = new JPanel(new BorderLayout(1, 0));
 		selectionPanel.add(panelDevice);
 		
 		deviceIP = new JTextField();
@@ -67,15 +65,21 @@ public class MainDialog extends JFrame {
 		deviceIP.setColumns(15);
 		
 		JButton btnBrowse = new JButton("Browse");
+		btnBrowse.setToolTipText("Open web interface on system browser");
 		btnBrowse.setPreferredSize(new Dimension(75, 16));
 		btnBrowse.addActionListener(e -> {
-			try {
-				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-				Desktop.getDesktop().browse(new URI("http://" + deviceIP.getText()));
-			} catch (IOException | URISyntaxException ex) {
-				JOptionPane.showMessageDialog(this, ex, "Error", JOptionPane.ERROR_MESSAGE);
-			} finally {
-				setCursor(Cursor.getDefaultCursor());
+			String shellyIP = deviceIP.getText();
+			if (shellyIP.matches(Main.IPV4_REGEX) == false) {
+				JOptionPane.showMessageDialog(this, "invalid IP.", "Error", JOptionPane.ERROR_MESSAGE);
+			} else {
+				try {
+					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+					Desktop.getDesktop().browse(new URI("http://" + shellyIP));
+				} catch (IOException | URISyntaxException ex) {
+					JOptionPane.showMessageDialog(this, ex, "Error", JOptionPane.ERROR_MESSAGE);
+				} finally {
+					setCursor(Cursor.getDefaultCursor());
+				}
 			}
 		});
 		panelDevice.add(btnBrowse, BorderLayout.EAST);
@@ -83,18 +87,20 @@ public class MainDialog extends JFrame {
 		JLabel lblNewLabel_1 = new JLabel("Image file");
 		selectionPanel.add(lblNewLabel_1);
 		
-		JPanel panelFile = new JPanel(new BorderLayout(0, 0));
-		panelFile.setOpaque(false);
+		JPanel panelFile = new JPanel(new BorderLayout(1, 0));
 		selectionPanel.add(panelFile);
 		
 		fwFileName = new JTextField();
-		fwFileName.setColumns(35);
+		fwFileName.setColumns(45);
 		panelFile.add(fwFileName, BorderLayout.CENTER);
 		
 		JButton fileSelectorButton = new JButton("Select");
 		fileSelectorButton.setPreferredSize(new Dimension(75, 16));
 		fileSelectorButton.addActionListener(e -> {
 			final JFileChooser fc = new JFileChooser();
+			FileNameExtensionFilter zipExt = new FileNameExtensionFilter("zip file", "zip");
+			fc.addChoosableFileFilter(zipExt);
+			fc.setFileFilter(zipExt);
 			fc.setCurrentDirectory(new File(fwFileName.getText()));
 			if(fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 				fwFileName.setText(fc.getSelectedFile().getAbsolutePath());
