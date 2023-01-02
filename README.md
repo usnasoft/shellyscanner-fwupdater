@@ -1,5 +1,5 @@
 # shellyscanner-fwupdater
-CLI devices firmware updater from local file
+CLI/GUI devices firmware updater from local file
 
 **Download new firmware;**  
 if you use http://archive.shelly-tools.de/  
@@ -7,8 +7,9 @@ you get an url such as ``http://192.168.1.100/ota?url=http://archive.shelly-tool
 use only the parameter (in this case ``http://archive.shelly-tools.de/version/v1.9.4/SHSW-1.zip``) to download the file locally.
 
 **Run the following command from terminal:**  
-``java -jar shellyscanner-fwupdater-1.0.0.jar <shelly ip> <firmware file>``  
+``java -jar shellyscanner-fwupdater-1.x.x.jar <shelly ip> <firmware file>``  
 e.g. ``C:\Users\Antonio\util\shellyscanner-fwupdater-1.0.0.jar 192.168.1.55 C:\Users\Antonio\Downloads\SHSW-1.zip``
+or just ``java -jar shellyscanner-fwupdater-1.x.x.jar`` to use GUI (you can also double click on the jar file)
 
 **You get approximately the following messages:**  
 Temporary server ready at address 192.168.1.4  
