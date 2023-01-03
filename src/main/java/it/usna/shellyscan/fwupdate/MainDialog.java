@@ -163,7 +163,7 @@ public class MainDialog extends JFrame {
 			}
 		});
 		
-		buttonPanel.add(Box.createHorizontalStrut(24));
+		buttonPanel.add(Box.createHorizontalStrut(24 + 2)); // [?] + border
 		buttonPanel.add(Box.createHorizontalGlue());
 		buttonPanel.add(btnUpdate);
 		buttonPanel.add(btnClose);
