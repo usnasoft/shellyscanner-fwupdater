@@ -1,21 +1,32 @@
 package it.usna.shellyscan.fwupdate;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-// https://api.shelly.cloud/files/firmware
 public class DownloadPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private final static String G1_CATALOG_URL = "https://api.shelly.cloud/files/firmware";
+	private JComboBox<FW> comboBox;
 
 	// windowsbuilder
 	public DownloadPanel() {
@@ -24,19 +35,78 @@ public class DownloadPanel extends JPanel {
 
 	public DownloadPanel(MainView main) {
 		setLayout(new BorderLayout());
+		setBorder(BorderFactory.createEmptyBorder(4, 6, 4, 6));
 
 		JPanel panel = new JPanel();
 		add(panel, BorderLayout.SOUTH);
 
 		JButton btnNewButton = new JButton(MainView.LABELS.getString("close"));
 		btnNewButton.addActionListener(e -> main.dispose());
+
+		JButton btnDownload = new JButton(MainView.LABELS.getString("downloadBtn"));
+		btnDownload.addActionListener(e -> {
+			String urlStr = ((FW)comboBox.getSelectedItem()).getUrl();
+			try {
+				String filename = urlStr.substring(urlStr.indexOf('/'));
+				final JFileChooser fc = new JFileChooser();
+				fc.setFileFilter(new FileNameExtensionFilter("zip file", "zip"));
+				fc.setSelectedFile(new File(filename));
+				//fc.setCurrentDirectory(new File(fwFileName.getText()));
+				if(fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+					URLConnection urlcon = new URL(urlStr).openConnection();
+					InputStream in = urlcon.getInputStream();
+					try (BufferedOutputStream outStream = new BufferedOutputStream(new FileOutputStream(fc.getSelectedFile()))) {
+						byte[] buffer = new byte[8 * 1024];
+						int bytesRead;
+						while ((bytesRead = in.read(buffer)) != -1) {
+							outStream.write(buffer, 0, bytesRead);
+						}
+					}
+				}
+			} catch (/*MalformedURL*/Exception e1) {
+				JOptionPane.showMessageDialog(this, MainView.LABELS.getString("fwWriteFileError"), MainView.LABELS.getString("error"), JOptionPane.ERROR_MESSAGE);
+			}
+		});
+		panel.add(btnDownload);
 		panel.add(btnNewButton);
-		
+
+		JPanel downloadPanel = new JPanel();
+		add(downloadPanel, BorderLayout.NORTH);
+		downloadPanel.setLayout(new GridLayout(0, 1, 0, 0));
+
+		FlowLayout fl_panel_1 = new FlowLayout(FlowLayout.LEFT);
+		fl_panel_1.setHgap(0);
+		JPanel panel_1 = new JPanel(fl_panel_1);
+		downloadPanel.add(panel_1);
+
+		JLabel label = new JLabel(MainView.LABELS.getString("deviceSelection"));
+		panel_1.add(label);
+
+		comboBox = new JComboBox<FW>();
+
+		panel_1.add(comboBox);
+
+		JLabel idLabel = new JLabel();
+		downloadPanel.add(idLabel);
+
+		JLabel versionLabel = new JLabel();
+		downloadPanel.add(versionLabel);
+
+		JLabel urlLabel = new JLabel();
+		downloadPanel.add(urlLabel);
+
+		comboBox.addActionListener(event -> {
+			final FW selected = (FW)comboBox.getSelectedItem();
+			idLabel.setText(selected.getId());
+			versionLabel.setText(selected.getVersion());
+			urlLabel.setText(selected.getUrl());
+		});
+
 		try {
 			init();
-		} catch (IOException e1) {
-//			JOptionPane.showMessageDialog("", e1);
-			e1.printStackTrace();
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(this, MainView.LABELS.getString("httpNoConnection"), MainView.LABELS.getString("error"), JOptionPane.ERROR_MESSAGE);
+			e.printStackTrace();
 		}
 	}
 
@@ -45,5 +115,36 @@ public class DownloadPanel extends JPanel {
 		URLConnection urlcon = url.openConnection();
 		final ObjectMapper jsonMapper = new ObjectMapper();
 		JsonNode node = jsonMapper.readTree(urlcon.getInputStream());
+
+		node.get("data").fields().forEachRemaining(entry -> {
+			comboBox.addItem(new FW(entry.getKey(), entry.getValue().get("url").asText(), entry.getValue().get("version").asText()));
+		});
+	}
+
+	private static class FW {
+		String id, url, version;
+
+		private FW(String id, String url, String version) {
+			this.id = id;
+			this.url = url;
+			this.version = version;
+		}
+
+		private String getId() {
+			return id;
+		}
+
+		private String getUrl() {
+			return url;
+		}
+
+		private String getVersion() {
+			return version;
+		}
+
+		@Override
+		public String toString() {
+			return id;
+		}
 	}
 }
