@@ -42,7 +42,8 @@ public class Main {
 				System.exit(5);
 			}
 		} else {
-			new MainDialog();
+//			new MainDialog();
+			new MainView();
 		}
 	}
 
