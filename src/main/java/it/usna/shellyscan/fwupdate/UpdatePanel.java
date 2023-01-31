@@ -115,7 +115,7 @@ public class UpdatePanel extends JPanel {
 			try {
 				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 				String res = upd.update(shellyIP, fwFile);
-				String msg = "Device responce to update command:\n" + res + "\n\nDO NOT close main application window or begin a new update before this one is complete.";
+				String msg = "Device reply to update command:\n" + res + "\n\nDO NOT close main application window or begin a new update before this one is complete.";
 				int ans = JOptionPane.showOptionDialog(this, msg, "Updating", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE, null, new String[] {"Close", "Check"}, null);
 				if(ans == 1) {
 					try {

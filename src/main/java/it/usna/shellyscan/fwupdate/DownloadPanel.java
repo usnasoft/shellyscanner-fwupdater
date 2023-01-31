@@ -143,7 +143,6 @@ public class DownloadPanel extends JPanel {
 		ArrayList<FW> cList = new ArrayList<>();
 		node.get("data").fields().forEachRemaining(entry -> {
 			cList.add(new FW(entry.getKey(), entry.getValue().get("url").asText(), entry.getValue().get("version").asText()));
-//			comboBox.addItem(new FW(entry.getKey(), entry.getValue().get("url").asText(), entry.getValue().get("version").asText()));
 		});
 		Collections.sort(cList);
 		cList.forEach(fw -> comboBox.addItem(fw));
