@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>usna.it</groupId>
 	<artifactId>shellyscanner-fwupdater</artifactId>
-	<version>1.1.0</version>
+	<version>1.2.0</version>
 	<name>fwupdater</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -1,6 +1,7 @@
 package it.usna.shellyscan.fwupdate;
 
 import java.awt.BorderLayout;
+import java.awt.Cursor;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.io.BufferedOutputStream;
@@ -10,8 +11,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -37,38 +44,43 @@ public class DownloadPanel extends JPanel {
 		setLayout(new BorderLayout());
 		setBorder(BorderFactory.createEmptyBorder(4, 6, 4, 6));
 
-		JPanel panel = new JPanel();
-		add(panel, BorderLayout.SOUTH);
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
 
-		JButton btnNewButton = new JButton(MainView.LABELS.getString("close"));
-		btnNewButton.addActionListener(e -> main.dispose());
+		add(buttonPanel, BorderLayout.SOUTH);
+
+		JButton closeButton = new JButton(MainView.LABELS.getString("close"));
+		closeButton.addActionListener(e -> main.dispose());
 
 		JButton btnDownload = new JButton(MainView.LABELS.getString("downloadBtn"));
 		btnDownload.addActionListener(e -> {
-			String urlStr = ((FW)comboBox.getSelectedItem()).getUrl();
 			try {
-				String filename = urlStr.substring(urlStr.indexOf('/'));
+				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+				String urlStr = ((FW)comboBox.getSelectedItem()).getUrl();
+				String filename = urlStr.substring(urlStr.lastIndexOf('/'));
 				final JFileChooser fc = new JFileChooser();
 				fc.setFileFilter(new FileNameExtensionFilter("zip file", "zip"));
 				fc.setSelectedFile(new File(filename));
-				//fc.setCurrentDirectory(new File(fwFileName.getText()));
 				if(fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
 					URLConnection urlcon = new URL(urlStr).openConnection();
 					InputStream in = urlcon.getInputStream();
-					try (BufferedOutputStream outStream = new BufferedOutputStream(new FileOutputStream(fc.getSelectedFile()))) {
+					File outFile = fc.getSelectedFile();
+					try (BufferedOutputStream outStream = new BufferedOutputStream(new FileOutputStream(outFile))) {
 						byte[] buffer = new byte[8 * 1024];
 						int bytesRead;
 						while ((bytesRead = in.read(buffer)) != -1) {
 							outStream.write(buffer, 0, bytesRead);
 						}
 					}
+					main.downloadSuccess(outFile.getPath());
+					JOptionPane.showMessageDialog(this, MainView.LABELS.getString("downloadOK"), Main.APP_NAME, JOptionPane.INFORMATION_MESSAGE);
 				}
 			} catch (/*MalformedURL*/Exception e1) {
 				JOptionPane.showMessageDialog(this, MainView.LABELS.getString("fwWriteFileError"), MainView.LABELS.getString("error"), JOptionPane.ERROR_MESSAGE);
+			} finally {
+				setCursor(Cursor.getDefaultCursor());
 			}
 		});
-		panel.add(btnDownload);
-		panel.add(btnNewButton);
 
 		JPanel downloadPanel = new JPanel();
 		add(downloadPanel, BorderLayout.NORTH);
@@ -101,6 +113,18 @@ public class DownloadPanel extends JPanel {
 			versionLabel.setText(selected.getVersion());
 			urlLabel.setText(selected.getUrl());
 		});
+		
+		buttonPanel.add(Box.createHorizontalStrut(24 + 2)); // [?] + border
+		buttonPanel.add(Box.createHorizontalGlue());
+		buttonPanel.add(btnDownload);
+		buttonPanel.add(closeButton);
+		buttonPanel.add(Box.createHorizontalGlue());
+		
+		JButton btnInfo = new JButton(null, new ImageIcon(getClass().getResource("/Question24.png")));
+		btnInfo.setContentAreaFilled(false);
+		btnInfo.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 2));
+		btnInfo.addActionListener(e -> main.info());
+		buttonPanel.add(btnInfo);
 
 		try {
 			init();
@@ -116,13 +140,17 @@ public class DownloadPanel extends JPanel {
 		final ObjectMapper jsonMapper = new ObjectMapper();
 		JsonNode node = jsonMapper.readTree(urlcon.getInputStream());
 
+		ArrayList<FW> cList = new ArrayList<>();
 		node.get("data").fields().forEachRemaining(entry -> {
-			comboBox.addItem(new FW(entry.getKey(), entry.getValue().get("url").asText(), entry.getValue().get("version").asText()));
+			cList.add(new FW(entry.getKey(), entry.getValue().get("url").asText(), entry.getValue().get("version").asText()));
+//			comboBox.addItem(new FW(entry.getKey(), entry.getValue().get("url").asText(), entry.getValue().get("version").asText()));
 		});
+		Collections.sort(cList);
+		cList.forEach(fw -> comboBox.addItem(fw));
 	}
 
-	private static class FW {
-		String id, url, version;
+	private static class FW implements Comparable<FW> {
+		private String id, url, version;
 
 		private FW(String id, String url, String version) {
 			this.id = id;
@@ -144,7 +172,12 @@ public class DownloadPanel extends JPanel {
 
 		@Override
 		public String toString() {
-			return id;
+			return MainView.LABELS.containsKey(id) ? MainView.LABELS.getString(id) + " (" + id + ")" : id;
+		}
+
+		@Override
+		public int compareTo(FW o) {
+			return toString().toLowerCase().compareTo(o.toString().toLowerCase());
 		}
 	}
 }

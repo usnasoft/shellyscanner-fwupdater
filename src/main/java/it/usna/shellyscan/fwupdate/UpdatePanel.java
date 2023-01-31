@@ -10,29 +10,24 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.event.HyperlinkEvent;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.text.html.HTMLDocument;
 
 public class UpdatePanel extends JPanel {
 	private static final long serialVersionUID = 1L;
-	private FWUpdater upd = new FWUpdater();
-	private final static ResourceBundle LABELS = ResourceBundle.getBundle("LabelsBundle");
+	private JTextField fwFileName = new JTextField();
 
-	public UpdatePanel(MainView main) {
+	public UpdatePanel(MainView main, FWUpdater upd) {
 		setLayout(new BorderLayout(0, 8));
 		setBorder(BorderFactory.createEmptyBorder(4, 6, 4, 6));
 
@@ -75,8 +70,7 @@ public class UpdatePanel extends JPanel {
 		
 		JPanel panelFile = new JPanel(new BorderLayout(1, 0));
 		selectionPanel.add(panelFile);
-		
-		JTextField fwFileName = new JTextField();
+
 		fwFileName.setColumns(42);
 		panelFile.add(fwFileName, BorderLayout.CENTER);
 		
@@ -151,23 +145,11 @@ public class UpdatePanel extends JPanel {
 		JButton btnInfo = new JButton(null, new ImageIcon(getClass().getResource("/Question24.png")));
 		btnInfo.setContentAreaFilled(false);
 		btnInfo.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 2));
-		btnInfo.addActionListener(e -> {
-			JEditorPane ep = new JEditorPane("text/html", "<html><h1><font color=#00005a>" + Main.APP_NAME + " <img src=\"usna16.gif\"></h1></font><p>" + LABELS.getString("aboutApp") + "</html>");
-			ep.setEditable(false);
-			((HTMLDocument)ep.getDocument()).setBase(getClass().getResource("/"));
-			ep.addHyperlinkListener(ev -> {
-				try {
-					if(ev.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
-						if(Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-							Desktop.getDesktop().browse(new URI(ev.getURL().toString()));
-						} else {
-							JOptionPane.showMessageDialog(this, ev.getURL(), "", JOptionPane.PLAIN_MESSAGE);
-						}
-					}
-				} catch (IOException | URISyntaxException ex) {}
-			});
-			JOptionPane.showMessageDialog(UpdatePanel.this, ep, Main.APP_NAME, JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/ShSc24.png")));
-		});
+		btnInfo.addActionListener(e -> main.info());
 		buttonPanel.add(btnInfo);
+	}
+	
+	public void setFirmwareFilename(String name) {
+		fwFileName.setText(name);
 	}
 }
