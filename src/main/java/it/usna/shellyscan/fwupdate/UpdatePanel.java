@@ -12,9 +12,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -85,12 +82,7 @@ public class UpdatePanel extends JPanel {
 			}
 		});
 		panelFile.add(fileSelectorButton, BorderLayout.EAST);
-		
-		JPanel buttonPanel = new JPanel();
-		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
 
-		add(buttonPanel, BorderLayout.SOUTH);
-		
 		JButton btnClose = new JButton("Close");
 		btnClose.addActionListener(e -> main.dispose());
 		
@@ -135,18 +127,9 @@ public class UpdatePanel extends JPanel {
 				setCursor(Cursor.getDefaultCursor());
 			}
 		});
-		
-		buttonPanel.add(Box.createHorizontalStrut(24 + 2)); // [?] + border
-		buttonPanel.add(Box.createHorizontalGlue());
-		buttonPanel.add(btnUpdate);
-		buttonPanel.add(btnClose);
-		buttonPanel.add(Box.createHorizontalGlue());
-		
-		JButton btnInfo = new JButton(null, new ImageIcon(getClass().getResource("/Question24.png")));
-		btnInfo.setContentAreaFilled(false);
-		btnInfo.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 2));
-		btnInfo.addActionListener(e -> main.info());
-		buttonPanel.add(btnInfo);
+
+		JPanel buttonPanel = main.buttonPanel(btnUpdate, btnClose);
+		add(buttonPanel, BorderLayout.SOUTH);
 	}
 	
 	public void setFirmwareFilename(String name) {

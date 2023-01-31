@@ -8,7 +8,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ResourceBundle;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -43,8 +47,8 @@ public class MainView extends JFrame {
 		updatePanel.setFirmwareFilename(path);
 	}
 	
-	public void info() {
-		JEditorPane ep = new JEditorPane("text/html", "<html><h1><font color=#00005a>" + Main.APP_NAME + " <img src=\"usna16.gif\"></h1></font><p>" + LABELS.getString("aboutApp") + "</html>");
+	private void info() {
+		JEditorPane ep = new JEditorPane("text/html", "<html><h1><font color=#00005a>" + Main.APP_NAME + " " + Main.VER + " <img src=\"usna16.gif\"></h1></font><p>" + LABELS.getString("aboutApp") + "</html>");
 		ep.setEditable(false);
 		((HTMLDocument)ep.getDocument()).setBase(getClass().getResource("/"));
 		ep.addHyperlinkListener(ev -> {
@@ -53,12 +57,31 @@ public class MainView extends JFrame {
 					if(Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
 						Desktop.getDesktop().browse(new URI(ev.getURL().toString()));
 					} else {
-						JOptionPane.showMessageDialog(this, ev.getURL(), "", JOptionPane.PLAIN_MESSAGE);
+						JOptionPane.showMessageDialog(this, ev.getURL(), Main.APP_NAME, JOptionPane.PLAIN_MESSAGE);
 					}
 				}
 			} catch (IOException | URISyntaxException ex) {}
 		});
 		JOptionPane.showMessageDialog(this, ep, Main.APP_NAME, JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getClass().getResource("/ShSc24.png")));
+	}
+
+	public JPanel buttonPanel(JButton ... buttons) {
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
+		
+		buttonPanel.add(Box.createHorizontalStrut(24 + 2)); // [?] + border
+		buttonPanel.add(Box.createHorizontalGlue());
+		for(JButton b: buttons) {
+			buttonPanel.add(b);
+		}
+		buttonPanel.add(Box.createHorizontalGlue());
+		
+		JButton btnInfo = new JButton(null, new ImageIcon(getClass().getResource("/Question24.png")));
+		btnInfo.setContentAreaFilled(false);
+		btnInfo.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 2));
+		btnInfo.addActionListener(e -> info());
+		buttonPanel.add(btnInfo);
+		return buttonPanel;
 	}
 
 	@Override

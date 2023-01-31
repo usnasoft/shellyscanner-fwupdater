@@ -12,13 +12,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 
 import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -43,11 +39,6 @@ public class DownloadPanel extends JPanel {
 	public DownloadPanel(MainView main) {
 		setLayout(new BorderLayout());
 		setBorder(BorderFactory.createEmptyBorder(4, 6, 4, 6));
-
-		JPanel buttonPanel = new JPanel();
-		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
-
-		add(buttonPanel, BorderLayout.SOUTH);
 
 		JButton closeButton = new JButton(MainView.LABELS.getString("close"));
 		closeButton.addActionListener(e -> main.dispose());
@@ -113,18 +104,9 @@ public class DownloadPanel extends JPanel {
 			versionLabel.setText(selected.getVersion());
 			urlLabel.setText(selected.getUrl());
 		});
-		
-		buttonPanel.add(Box.createHorizontalStrut(24 + 2)); // [?] + border
-		buttonPanel.add(Box.createHorizontalGlue());
-		buttonPanel.add(btnDownload);
-		buttonPanel.add(closeButton);
-		buttonPanel.add(Box.createHorizontalGlue());
-		
-		JButton btnInfo = new JButton(null, new ImageIcon(getClass().getResource("/Question24.png")));
-		btnInfo.setContentAreaFilled(false);
-		btnInfo.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 2));
-		btnInfo.addActionListener(e -> main.info());
-		buttonPanel.add(btnInfo);
+
+		JPanel buttonPanel = main.buttonPanel(btnDownload, closeButton);
+		add(buttonPanel, BorderLayout.SOUTH);
 
 		try {
 			init();
