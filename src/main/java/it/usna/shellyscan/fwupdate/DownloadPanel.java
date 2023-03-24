@@ -124,19 +124,25 @@ public class DownloadPanel extends JPanel {
 
 		ArrayList<FW> cList = new ArrayList<>();
 		node.get("data").fields().forEachRemaining(entry -> {
-			cList.add(new FW(entry.getKey(), entry.getValue().get("url").asText(), entry.getValue().get("version").asText()));
+			cList.add(new FW(entry.getKey(), entry.getValue().get("url").asText(), entry.getValue().get("version").asText(), false));
+			JsonNode beta;
+			if((beta = entry.getValue().get("beta_url")) != null && beta.asText().length() > 0) {
+				cList.add(new FW(entry.getKey(), beta.asText(), entry.getValue().get("beta_ver").asText(), true));
+			}
 		});
 		Collections.sort(cList);
 		cList.forEach(fw -> comboBox.addItem(fw));
 	}
 
 	private static class FW implements Comparable<FW> {
-		private String id, url, version;
+		private final String id, url, version;
+		private final boolean beta;
 
-		private FW(String id, String url, String version) {
+		private FW(String id, String url, String version, boolean beta) {
 			this.id = id;
 			this.url = url;
 			this.version = version;
+			this.beta = beta;
 		}
 
 		private String getId() {
@@ -153,7 +159,11 @@ public class DownloadPanel extends JPanel {
 
 		@Override
 		public String toString() {
-			return MainView.LABELS.containsKey(id) ? MainView.LABELS.getString(id) + " (" + id + ")" : id;
+			String res = MainView.LABELS.containsKey(id) ? MainView.LABELS.getString(id) + " (" + id + ")" : id;
+			if(beta) {
+				res += " beta";
+			}
+			return res;
 		}
 
 		@Override
