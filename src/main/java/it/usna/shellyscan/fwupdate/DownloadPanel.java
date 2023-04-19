@@ -172,3 +172,10 @@ public class DownloadPanel extends JPanel {
 		}
 	}
 }
+
+/*
+https://updates.shelly.cloud/update/One
+https://updates.shelly.cloud/update/OnePM
+https://updates.shelly.cloud/update/Plus2PM
+https://updates.shelly.cloud/update/PlusI4
+*/
